@@ -2,10 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
-
 const port = process.env.PORT || 3000;
-const app = express();
 
+const app = express();
 app.use(cors());
 app.use(express.json());
 
@@ -38,12 +37,12 @@ async function run() {
 
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        // await client.close(); // Uncomment if you want to close the client on server stop
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
     }
 }
 
-run().catch(console.dir);
+run();
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -52,3 +51,17 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Example app listening on port http://localhost:${port}`);
 });
+
+
+// Export handler for Vercel serverless function
+module.exports = (req, res) => {
+    return new Promise((resolve, reject) => {
+        app(req, res, (err) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve();
+            }
+        });
+    });
+};
