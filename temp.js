@@ -1,9 +1,7 @@
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
 const express = require('express');
 const cors = require('cors');
-// const db = require('./temp.json')
-
+const { MongoClient, ServerApiVersion } = require('mongodb');
 const port = process.env.PORT || 3000;
 
 const app = express();
@@ -21,12 +19,11 @@ const client = new MongoClient(uri, {
 });
 
 async function run() {
-
     try {
         await client.connect();
+
         const database = client.db("whitecastleDB");
         const menuCollection = database.collection("menuCollection");
-        const cartCollection = database.collection("cartCollection");
 
         app.get('/menu', async (req, res) => {
             try {
@@ -38,24 +35,14 @@ async function run() {
             }
         });
 
-        app.post('/carts', async (req, res) => {
-            const carts = req.body;
-            console.log(carts)
-            const result = await cartCollection.insertOne(carts);
-            res.send(result)
-        })
-
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
-
-    } finally {
-        // Ensures that the client will close when you finish/error
-        //await client.close();
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
     }
 }
 
-run().catch(console.dir);
-
+run();
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -66,3 +53,15 @@ app.listen(port, () => {
 });
 
 
+// // Export handler for Vercel serverless function
+// module.exports = (req, res) => {
+//     return new Promise((resolve, reject) => {
+//         app(req, res, (err) => {
+//             if (err) {
+//                 reject(err);
+//             } else {
+//                 resolve();
+//             }
+//         });
+//     });
+// };
